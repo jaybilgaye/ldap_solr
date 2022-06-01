@@ -66,13 +66,18 @@ public class BasicAuthPlugin extends AuthenticationPlugin implements ConfigEdita
   private String ldapObjectClass="";
   public static final String INITIAL_CONTEXT_FACTORY = "com.sun.jndi.ldap.LdapCtxFactory";
   public static final String SECURITY_AUTHENTICATION = "simple";
-
+  
+  private boolean forwardCredentials = false;
+    
   public boolean ldapAuthentication(String uid, String pwd){
     Hashtable env = new Hashtable();
     env.put(Context.INITIAL_CONTEXT_FACTORY, INITIAL_CONTEXT_FACTORY);
     env.put(Context.PROVIDER_URL, ldapURL);
     env.put(Context.SECURITY_AUTHENTICATION, SECURITY_AUTHENTICATION);
-    
+    env.put(Context.SECURITY_PRINCIPAL,"CN=ABCGO,OU=Robot,DC=com");
+    env.put(Context.SECURITY_CREDENTIALS,"mypassword");
+
+
     DirContext ctx = null;
 
     boolean success = false;
@@ -86,10 +91,18 @@ public class BasicAuthPlugin extends AuthenticationPlugin implements ConfigEdita
         String filter = "(&(objectClass="+ldapObjectClass+")(uid={0}))";           
         SearchControls ctls = new SearchControls();
         ctls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-        ctls.setReturningAttributes(new String[0]);
+        //ctls.setReturningAttributes(new String[0]);
+        ctls.setReturningAttributes(new String[] { "givenName", "sn", "memberOf" }};
         ctls.setReturningObjFlag(true);
-        NamingEnumeration enm = ctx.search(base, filter, new String[] { uid }, ctls);
-
+        //NamingEnumeration enm = ctx.search(base, filter, new String[] { uid }, ctls);
+        NamingEnumeration enm = ctx.search(base, "(samAccountName=" + uid + ")", ctls);
+        log.debug("ldapURL: "+ldapURL);
+        log.debug("ctx: "+ctx);
+        log.debug("base: "+base);
+        log.debug("filter: "+filter);
+        log.debug("ctls: "+ctls);
+        log.debug("enm: "+enm);
+        
         String dn = null;
 
         if (enm.hasMore()) {
