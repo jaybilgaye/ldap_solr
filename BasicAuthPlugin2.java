@@ -61,9 +61,13 @@ public class BasicAuthPlugin extends AuthenticationPlugin implements ConfigEdita
   public static final String LDAP_URL = "ldapURL";
   public static final String LDAP_BASE = "ldapBase";
   public static final String LDAP_OBJECT_CLASS = "ldapObjectClass";
+  public static final String LDAP_USERN = "userName";
+  public static final String LDAP_PASSN = "passName";
   private String ldapURL="ldap://localhost:10389/";
   private String ldapBase="";
   private String ldapObjectClass="";
+  private String userName="";
+  private String passName="";
   public static final String INITIAL_CONTEXT_FACTORY = "com.sun.jndi.ldap.LdapCtxFactory";
   public static final String SECURITY_AUTHENTICATION = "simple";
   
@@ -74,8 +78,8 @@ public class BasicAuthPlugin extends AuthenticationPlugin implements ConfigEdita
     env.put(Context.INITIAL_CONTEXT_FACTORY, INITIAL_CONTEXT_FACTORY);
     env.put(Context.PROVIDER_URL, ldapURL);
     env.put(Context.SECURITY_AUTHENTICATION, SECURITY_AUTHENTICATION);
-    env.put(Context.SECURITY_PRINCIPAL,"CN=ABCGO,OU=Robot,DC=com");
-    env.put(Context.SECURITY_CREDENTIALS,"mypassword");
+    env.put(Context.SECURITY_PRINCIPAL, userName);
+    env.put(Context.SECURITY_CREDENTIALS, passName);
 
 
     DirContext ctx = null;
@@ -102,7 +106,9 @@ public class BasicAuthPlugin extends AuthenticationPlugin implements ConfigEdita
         log.debug("filter: "+filter);
         log.debug("ctls: "+ctls);
         log.debug("enm: "+enm);
-        
+        log.debug("uName:"+userName);
+        log.debug("uPass:"+passName);
+                                    
         String dn = null;
 
         if (enm.hasMore()) {
@@ -185,6 +191,24 @@ public class BasicAuthPlugin extends AuthenticationPlugin implements ConfigEdita
     if (o3 != null) {
       try {
         ldapObjectClass = o3.toString();
+      } catch (Exception e) {
+        log.error(e.getMessage());
+      }
+    }
+    Object o4 = pluginConfig.get(LDAP_USERN);
+    if (o4 != null) {
+      try {
+        log.debug("uName:"+userName);
+        userName = o4.toString();
+      } catch (Exception e) {
+        log.error(e.getMessage());
+      }
+    }
+    Object o5 = pluginConfig.get(LDAP_PASSN);
+    if (o5 != null) {
+      try {
+        log.debug("uPass:"+passName);
+        passName = o5.toString();
       } catch (Exception e) {
         log.error(e.getMessage());
       }
